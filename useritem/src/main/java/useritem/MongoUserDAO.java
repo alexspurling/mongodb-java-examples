@@ -1,11 +1,13 @@
 package useritem;
 
 import com.google.code.morphia.Datastore;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MapReduceOutput;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
 public class MongoUserDAO implements UserDAO {
 
@@ -27,7 +29,7 @@ public class MongoUserDAO implements UserDAO {
     return ds.getCount(User.class);
   }
   
-  public Map<Integer, Integer> getItemCounts() {
+  public List<ItemCount> getTopTenItems() {
     DBCollection col = ds.getCollection(User.class);
     String mapFunction = 
       "function () {" +
@@ -43,14 +45,23 @@ public class MongoUserDAO implements UserDAO {
         "}" +
         "return {count:total};" +
       "}";
+    
+    
+    long startTime = System.currentTimeMillis();
     MapReduceOutput out = col.mapReduce(mapFunction, reduceFunction, null, null);
+    System.out.println("Map reduce time: " + (System.currentTimeMillis() - startTime));
     
-    Map<Integer, Integer> itemCounts = new HashMap<Integer, Integer>();
+    DBCollection outCol = out.getOutputCollection();
     
-    for (DBObject r : out.results()){
+    DBCursor cur = outCol.find().sort(new BasicDBObject("value", -1)).limit(10);
+    
+    List<ItemCount> itemCounts = new ArrayList<ItemCount>();
+    
+    while(cur.hasNext()) {
+      DBObject r = cur.next();
       int id = (Integer)((DBObject)r.get("_id")).get("id");
       int count = ((Number)((DBObject)r.get("value")).get("count")).intValue();
-      itemCounts.put(id, count);
+      itemCounts.add(new ItemCount(id, count));
     }
     
     return itemCounts;

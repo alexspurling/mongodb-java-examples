@@ -15,11 +15,12 @@ public class UserItemTest {
 
   public void run() {
     
+    System.out.println("Generating 100 random users");
     //Randomly generate 100 users
     List<User> users = getRandomUsers(100);
     
+    System.out.println("Saving new users to db");
     for (User user : users) {
-      System.out.println("user: " + user);
       //Persist them in the db
       userDao.save(user);
     }
@@ -34,10 +35,11 @@ public class UserItemTest {
     System.out.println(userDao.getById(String.valueOf(firstId)));
     
     //Get the most common items
-    Map<Integer, Integer> itemCounts = userDao.getItemCounts();
+    System.out.println("Getting the top ten items");
+    List<ItemCount> topTenItems = userDao.getTopTenItems();
     
-    for (Integer itemId : itemCounts.keySet()) {
-      System.out.println("Item " + itemId + ": " + itemCounts.get(itemId));
+    for (ItemCount itemCount : topTenItems) {
+      System.out.println(itemCount);
     }
   }
   

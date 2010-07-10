@@ -1,12 +1,12 @@
 package useritem;
 
-import java.util.Map;
+import java.util.List;
 
 public interface UserDAO {
   
   void save(User User);
   User getById(String id);
   long getUserCount();
-  Map<Integer, Integer> getItemCounts();
+  List<ItemCount> getTopTenItems();
 
 }
