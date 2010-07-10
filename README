@@ -1,0 +1,9 @@
+------------------------
+MongoDB examples in Java
+------------------------
+
+This is a repository for my MongoDB example projects using the Java driver.
+
+Projects:
+
+useritem - Loads a bunch of random users into the database and aggregates data on each user's items
