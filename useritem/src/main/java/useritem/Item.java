@@ -15,6 +15,10 @@ public class Item {
     this.id = id;
   }
   
+  public int getId() {
+    return id;
+  }
+  
   public String toString() {
      return "Item id: " + id;
   }

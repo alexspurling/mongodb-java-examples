@@ -30,6 +30,10 @@ public class User {
     return id;
   }
   
+  public List<Item> getItems() {
+    return items;
+  }
+  
   public String toString() {
     return "User id: " + id + ", name: " + name + ", items: " + items;
   }

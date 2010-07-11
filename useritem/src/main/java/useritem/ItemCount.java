@@ -10,6 +10,10 @@ public class ItemCount {
     this.itemCount = itemCount;
   }
   
+  public int getItemCount() {
+    return itemCount;
+  }
+  
   public String toString() {
     return "Item " + itemId + ": " + itemCount;
   }

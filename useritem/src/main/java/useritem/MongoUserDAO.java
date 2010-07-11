@@ -6,8 +6,14 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MapReduceOutput;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.TreeSet;
+import java.util.SortedSet;
+import java.util.Iterator;
 
 public class MongoUserDAO implements UserDAO {
 
@@ -30,6 +36,39 @@ public class MongoUserDAO implements UserDAO {
   }
   
   public List<ItemCount> getTopTenItems() {
+    long startTime = System.currentTimeMillis();
+    Map<Integer, Integer> itemCounts = new HashMap<Integer, Integer>();
+    for (User user : ds.find(User.class)) {
+      if (user.getItems() != null) {
+        for (Item item : user.getItems()) {
+          Integer itemCount = itemCounts.get(item.getId());
+          if (itemCount == null) {
+            itemCount = 0;
+          }
+          itemCount++;
+          itemCounts.put(item.getId(), itemCount);
+        }
+      }
+    }
+    System.out.println("Map time: " + (System.currentTimeMillis() - startTime));
+    SortedSet<ItemCount> itemCountSet = new TreeSet(new Comparator<ItemCount>() {
+      public int compare(ItemCount itemCount1, ItemCount itemCount2) {
+        return new Integer(itemCount2.getItemCount()).compareTo(itemCount1.getItemCount());
+      }
+    });
+    for (Integer itemId : itemCounts.keySet()) {
+      itemCountSet.add(new ItemCount(itemId, itemCounts.get(itemId)));
+    }
+    List<ItemCount> topTenItemCounts = new ArrayList<ItemCount>();
+    Iterator<ItemCount> itemCountIter = itemCountSet.iterator();
+    for (int i = 0; i < 10 && itemCountIter.hasNext(); i++) {
+      topTenItemCounts.add(itemCountIter.next());
+    }
+    System.out.println("Total time: " + (System.currentTimeMillis() - startTime));
+    return topTenItemCounts;
+  }
+
+  public List<ItemCount> getTopTenItems2() {
     DBCollection col = ds.getCollection(User.class);
     String mapFunction = 
       "function () {" +
