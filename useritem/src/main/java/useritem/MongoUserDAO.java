@@ -21,6 +21,7 @@ public class MongoUserDAO implements UserDAO {
   
   public MongoUserDAO(Datastore ds) {
     this.ds = ds;
+    ds.getCollection(User.class).drop();
   }
 
   public void save(User user) {
@@ -35,7 +36,7 @@ public class MongoUserDAO implements UserDAO {
     return ds.getCount(User.class);
   }
   
-  public List<ItemCount> getTopTenItems() {
+  public List<ItemCount> getTopTenItems2() {
     long startTime = System.currentTimeMillis();
     Map<Integer, Integer> itemCounts = new HashMap<Integer, Integer>();
     for (User user : ds.find(User.class)) {
@@ -68,21 +69,24 @@ public class MongoUserDAO implements UserDAO {
     return topTenItemCounts;
   }
 
-  public List<ItemCount> getTopTenItems2() {
+  public List<ItemCount> getTopTenItems() {
     DBCollection col = ds.getCollection(User.class);
     String mapFunction = 
       "function () {" +
         "if (this.items != null) {" +
-          "this.items.forEach(function (z) {emit(z, {count:1});});" +
+          "this.items.forEach(function (item) {emit(item.id, 1);});" +
         "}" +
       "}";
     String reduceFunction = 
       "function (key, values) {" + 
         "var total = 0;" +
+        "var valStr = \"\";" +
         "for (var i = 0; i < values.length; i++) {" +
-          "total += values[i].count;" +
+          "total += values[i];" +
+          "valStr = valStr + values[i] + \", \";" +
         "}" +
-        "return {count:total};" +
+        "print(\"key: \" + key + \", values: \" + valStr);" +
+        "return total;" +
       "}";
     
     
@@ -98,8 +102,8 @@ public class MongoUserDAO implements UserDAO {
     
     while(cur.hasNext()) {
       DBObject r = cur.next();
-      int id = (Integer)((DBObject)r.get("_id")).get("id");
-      int count = ((Number)((DBObject)r.get("value")).get("count")).intValue();
+      int id = ((Number)r.get("_id")).intValue();
+      int count = ((Number)r.get("value")).intValue();
       itemCounts.add(new ItemCount(id, count));
     }
     

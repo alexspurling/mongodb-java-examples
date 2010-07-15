@@ -15,14 +15,14 @@ public class UserItemTest {
 
   public void run() {
     
-    System.out.println("Generating 10000 random users");
+    System.out.println("Generating 100 random users");
     //Randomly generate 100 users
-    List<User> users = getRandomUsers(10000);
+    List<User> users = getRandomUsers(100);
     
     System.out.println("Saving new users to db");
     for (User user : users) {
       //Persist them in the db
-      //userDao.save(user);
+      userDao.save(user);
     }
     
     long count = userDao.getUserCount();
